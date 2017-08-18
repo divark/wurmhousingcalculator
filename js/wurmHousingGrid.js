@@ -86,6 +86,50 @@ function getElevatedCarpentry(myLevel) {
     }
 }
 
+//getElevatedColor returns the appropriate color
+//code in rgb for the level specified.
+function getElevatedColor(myLevel) {
+    switch(myLevel) {
+        case 0:
+            return "rgba(0, 0, 0, 0)";
+        case 1:
+            return "rgb(30, 0, 255)";
+        case 2:
+            return "rgb(0, 66, 255)";
+        case 3:
+            return "rgb(0, 162, 255)";
+        case 4:
+            return "rgb(0, 252, 255)";
+        case 5:
+            return "rgb(0,255,162)";
+        case 6:
+            return "rgb(0, 255, 66)";
+        case 7:
+            return "rgb(30, 255, 0)";
+        case 8:
+            return "rgb(126, 255, 0)";
+        case 9:
+            return "rgb(222, 255, 0)";
+        case 10:
+            return "rgb(255, 192, 0)";
+        case 11:
+            return "rgb(255, 96, 0)";
+        case 12:
+            return "rgb(255, 0, 0)";
+        case 13:
+            return "rgb(255, 0, 96)";
+        case 14:
+            return "rgb(255, 0, 192)";
+        case 15:
+            return "rgb(222, 0, 255)";
+        case 16:
+            return "rgb(126, 0, 255)";
+        default:
+            alert("getElevatedColor: Invalid level specified.");
+            return -1;
+    }
+}
+
 //changeRequirements updates the text on the page describing the
 //required materials.
 function changeRequirements(clickedOn, isAdding) {
@@ -97,8 +141,9 @@ function changeRequirements(clickedOn, isAdding) {
         mySuppliesNeeded[1] = 4;
         mySuppliesNeeded[2] = 8;
         mySuppliesNeeded[3] = 10;
-        mySuppliesNeeded[4] = 90;
+        mySuppliesNeeded[4] = 95;
         mySuppliesNeeded[5] = 90;
+        mySuppliesNeeded[6] = 10;
 
         document.getElementById("carpentry").innerHTML =
             "Carpentry Required For Wooden House: " + carpentrySkill;
@@ -117,6 +162,8 @@ function changeRequirements(clickedOn, isAdding) {
             "Stone Bricks: " + mySuppliesNeeded[4];
         document.getElementById("mortar").innerHTML =
             "Mortar: " + mySuppliesNeeded[5];
+        document.getElementById("slateshingles").innerHTML =
+            "Slate Shingles: " + mySuppliesNeeded[6];
         return 0;
     }
 
@@ -129,6 +176,7 @@ function changeRequirements(clickedOn, isAdding) {
         mySuppliesNeeded[3] = 0;
         mySuppliesNeeded[4] = 0;
         mySuppliesNeeded[5] = 0;
+        mySuppliesNeeded[6] = 0;
 
         document.getElementById("carpentry").innerHTML =
             "Carpentry Required For Wooden House: " + carpentrySkill;
@@ -147,6 +195,8 @@ function changeRequirements(clickedOn, isAdding) {
             "Stone Bricks: " + mySuppliesNeeded[4];
         document.getElementById("mortar").innerHTML =
             "Mortar: " + mySuppliesNeeded[5];
+        document.getElementById("slateshingles").innerHTML =
+            "Slate Shingles: " + mySuppliesNeeded[6];
         return 0;
     }
 
@@ -164,6 +214,14 @@ function changeRequirements(clickedOn, isAdding) {
             carpentrySkill -= sideCount;
             //I added one to the side count to incorporate a new floor.
             carpentrySkill += (4 - sideCount) + 1;
+
+            if(carpentrySkill > 100) {
+                carpentrySkill += sideCount;
+                carpentrySkill -= (4 - sideCount) + 1;
+
+                alert("Max carpentry skill exceeded!");
+                return -1;
+            }
         }
         if(highestElevated > carpentrySkill) elevatedPreferred = true;
 
@@ -173,16 +231,20 @@ function changeRequirements(clickedOn, isAdding) {
         mySuppliesNeeded[1] -= sideCount;
         mySuppliesNeeded[1] += 4 - sideCount;
 
-        if(gridSlot == 1) {
-            mySuppliesNeeded[2] += 4;
-            mySuppliesNeeded[3] += 10;
-        }
-
         mySuppliesNeeded[4] -= 20 * sideCount;
         mySuppliesNeeded[4] += 20 * (4 - sideCount) + 10;
 
         mySuppliesNeeded[5] -= 20 * sideCount;
         mySuppliesNeeded[5] += 20 * (4 - sideCount) + 10;
+
+        if(gridSlot == 1) {
+            mySuppliesNeeded[2] += 4;
+            mySuppliesNeeded[3] += 10;
+
+            mySuppliesNeeded[5] += 5;
+            mySuppliesNeeded[6] += 10;
+        }
+
     } else {
         let sideCount = getConnectedCount(clickedOn);
 
@@ -206,16 +268,19 @@ function changeRequirements(clickedOn, isAdding) {
         mySuppliesNeeded[1] += sideCount;
         mySuppliesNeeded[1] -= 4 - sideCount;
 
-        if(gridSlot == 1) {
-            mySuppliesNeeded[2] -= 4;
-            mySuppliesNeeded[3] -= 10;
-        }
-
         mySuppliesNeeded[4] += 20 * sideCount;
         mySuppliesNeeded[4] -= 20 * (4 - sideCount) + 10;
 
         mySuppliesNeeded[5] += 20 * sideCount;
         mySuppliesNeeded[5] -= 20 * (4 - sideCount) + 10;
+
+        if(gridSlot == 1) {
+            mySuppliesNeeded[2] -= 4;
+            mySuppliesNeeded[3] -= 10;
+
+            mySuppliesNeeded[5] -= 5;
+            mySuppliesNeeded[6] -= 10;
+        }
     }
 
     if(elevatedPreferred) {
@@ -233,10 +298,13 @@ function changeRequirements(clickedOn, isAdding) {
         "Small Nails: " + mySuppliesNeeded[2];
     document.getElementById("woodenshingles").innerHTML =
         "Wooden Shingles: " + mySuppliesNeeded[3];
+
     document.getElementById("stonebricks").innerHTML =
         "Stone Bricks: " + mySuppliesNeeded[4];
     document.getElementById("mortar").innerHTML =
         "Mortar: " + mySuppliesNeeded[5];
+    document.getElementById("slateshingles").innerHTML =
+        "Slate Shingles: " + mySuppliesNeeded[6];
     return 0;
 }
 
@@ -258,9 +326,9 @@ function getConnectedCount(clickedOn) {
     if(gSlotReference > 1) isElevated = true;
 
     if(myRow - 1 < 0) noLeft = true;
-    if(myRow + 1 > 20) noRight = true;
+    if(myRow + 1 >= lengthOfGrid) noRight = true;
     if(myCol - 1 < 0) noDown = true;
-    if(myCol + 1 > 20) noUp = true;
+    if(myCol + 1 >= widthOfGrid) noUp = true;
 
     let normalSideValid = false;
     if(!noLeft) {
@@ -318,8 +386,7 @@ function changeCellColor(myEvent) {
     diagnosticMessages(clickedOn, false);
 
     //This area deals with adding a new square.
-    colorCheck = clickedOn.style.backgroundColor;
-    if(colorCheck != "rgb(255, 0, 0)") {
+    if(hGridArray[clickedOn.myRow][clickedOn.myCol] == 0) {
         numSquaresSelected++;
         if(numSquaresSelected == 1) buildingPlaced = true;
         
@@ -332,7 +399,7 @@ function changeCellColor(myEvent) {
             return;
         }
 
-        clickedOn.style.backgroundColor = "rgb(255, 0, 0)";
+        clickedOn.style.backgroundColor = getElevatedColor(hGridArray[clickedOn.myRow][clickedOn.myCol]);
         clickedOn.innerHTML = 1;
         return;
     }
@@ -349,10 +416,11 @@ function changeCellColor(myEvent) {
         let myGridSlot = hGridArray[clickedOn.myRow][clickedOn.myCol];
         clickedOn.innerHTML = myGridSlot;
         changeRequirements(clickedOn, true);
+        clickedOn.style.backgroundColor = getElevatedColor(hGridArray[clickedOn.myRow][clickedOn.myCol]);
         return;
     }
 
-    //This area deals with the removal of a square.
+    // //This area deals with the removal of a square.
     if(hGridArray[clickedOn.myRow][clickedOn.myCol] == 1) {
         numSquaresSelected--;
         if(numSquaresSelected == 0) buildingPlaced = false;
@@ -373,9 +441,9 @@ function changeCellColor(myEvent) {
     if(hGridArray[clickedOn.myRow][clickedOn.myCol] != 0) {
         clickedOn.innerHTML = hGridArray[clickedOn.myRow][clickedOn.myCol];
     } else {
-        clickedOn.style.backgroundColor = "rgba(0, 0, 0, 0)";
         clickedOn.innerHTML = "";
     }
+    clickedOn.style.backgroundColor = getElevatedColor(hGridArray[clickedOn.myRow][clickedOn.myCol]);
 }
 
 //twoDimArray returns a newly initialized two-dimensional array.
@@ -425,8 +493,8 @@ var highestElevated = 0;
 var carpentrySkill = 0;
 var masonrySkill = 30;
 //1st: Planks, 2nd: Large Nails, 3rd: Small Nails, 4th: Wood Shingles
-//5th: Stone Bricks, 6th: Mortar
-var mySuppliesNeeded = [0, 0, 0, 0, 0, 0];
+//5th: Stone Bricks, 6th: Mortar, 7th: Slate Shingles
+var mySuppliesNeeded = [0, 0, 0, 0, 0, 0, 0];
 
 //HTML Properties
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
