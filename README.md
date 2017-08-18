@@ -11,6 +11,4 @@ The Wurm Housing Calculator is a third party web application built for simplicit
 - See what materials you need to make a wooden house
 - See what materials you need to make a stone house
 - All calculations are done per selection!
-
-## Upcoming
 - Specify multi-level parts of your selection
