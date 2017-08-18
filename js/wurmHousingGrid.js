@@ -10,6 +10,10 @@ function diagnosticMessages(clickedOn, enabled) {
     let myColMessage = 'My Column is ' + (clickedOn.myCol + 1);
     console.log(myColMessage);
 
+    let myNumberSquaresMessage = "The grid had " + numSquaresSelected +
+        " Squares selected.";
+    console.log(myNumberSquaresMessage);
+
     let gridSlot = hGridArray[clickedOn.myRow][clickedOn.myCol];
     if(gridSlot == null) {
         console.log("This slot was undefined!");
@@ -19,10 +23,74 @@ function diagnosticMessages(clickedOn, enabled) {
     console.log(myGridMessage);
 }
 
+//updateHighestElevated updates the highestElevated
+//variable when a new highest is found.
+//Is primarily used for subtraction of a level.
+function updateHighestElevated() {
+    let highestFound = 0;
+
+    for(let i = 0; i < lengthOfGrid; i++) {
+        for(let j = 0; j < widthOfGrid; j++) {
+            if(hGridArray[i][j] != 0 && hGridArray[i][j] > highestFound) {
+                highestFound = hGridArray[i][j];
+            }
+        }
+    }
+
+    //I do this to accommodate for my subtraction style
+    highestFound--;
+    if(highestFound > 1) highestElevated = getElevatedCarpentry(highestFound);
+    else highestElevated = 0;
+}
+
+//getElevatedCarpentry returns the carpentry
+//level based on the fixed presets of Wurm
+//(As of August 18th 2017)
+function getElevatedCarpentry(myLevel) {
+    switch(myLevel) {
+        case 1:
+            return 0;
+        case 2:
+            return 21;
+        case 3:
+            return 30;
+        case 4:
+            return 39;
+        case 5:
+            return 47;
+        case 6:
+            return 55;
+        case 7:
+            return 63;
+        case 8:
+            return 70;
+        case 9:
+            return 77;
+        case 10:
+            return 83;
+        case 11:
+            return 88;
+        case 12:
+            return 92;
+        case 13:
+            return 95;
+        case 14:
+            return 97;
+        case 15:
+            return 98;
+        case 16:
+            return 99;
+        default:
+            alert("getElevatedCarpentry: Invalid level specified.");
+            return -1;
+    }
+}
+
 //changeRequirements updates the text on the page describing the
 //required materials.
-function changeRequirements(clickedOn, isInitial, isAdding) {
-    if(isInitial) {
+function changeRequirements(clickedOn, isAdding) {
+    let gridSlot = hGridArray[clickedOn.myRow][clickedOn.myCol];
+    if(numSquaresSelected == 1 && gridSlot == 1 && numElevated == 0) {
         carpentrySkill = 5;
 
         mySuppliesNeeded[0] = 80;
@@ -49,7 +117,7 @@ function changeRequirements(clickedOn, isInitial, isAdding) {
             "Stone Bricks: " + mySuppliesNeeded[4];
         document.getElementById("mortar").innerHTML =
             "Mortar: " + mySuppliesNeeded[5];
-        return;
+        return 0;
     }
 
     if(!buildingPlaced) {
@@ -79,34 +147,84 @@ function changeRequirements(clickedOn, isInitial, isAdding) {
             "Stone Bricks: " + mySuppliesNeeded[4];
         document.getElementById("mortar").innerHTML =
             "Mortar: " + mySuppliesNeeded[5];
-        return;
+        return 0;
     }
 
-    //I added one to the side count to incorporate a new floor.
+    let elevatedPreferred = false;
     if(isAdding) {
         let sideCount = getConnectedCount(clickedOn);
 
-        carpentrySkill += 5 - (sideCount + 1);
-        mySuppliesNeeded[0] += (80 - (20 * (sideCount + 1)));
-        mySuppliesNeeded[1] += (4 - (sideCount + 1));
-        mySuppliesNeeded[2] += 4;
-        mySuppliesNeeded[3] += 10;
-        mySuppliesNeeded[4] += (90 - (20 * (sideCount + 1)));
-        mySuppliesNeeded[5] += (90 - (20 * (sideCount + 1)));
+        if(sideCount == -1) return -1;
+
+        if(gridSlot > 1) {
+            let elevatedNumber = getElevatedCarpentry(gridSlot);
+
+            if(elevatedNumber > highestElevated) highestElevated = elevatedNumber;
+        } else {
+            carpentrySkill -= sideCount;
+            //I added one to the side count to incorporate a new floor.
+            carpentrySkill += (4 - sideCount) + 1;
+        }
+        if(highestElevated > carpentrySkill) elevatedPreferred = true;
+
+        mySuppliesNeeded[0] -= 20 * sideCount;
+        mySuppliesNeeded[0] += 20 * (4 - sideCount);
+
+        mySuppliesNeeded[1] -= sideCount;
+        mySuppliesNeeded[1] += 4 - sideCount;
+
+        if(gridSlot == 1) {
+            mySuppliesNeeded[2] += 4;
+            mySuppliesNeeded[3] += 10;
+        }
+
+        mySuppliesNeeded[4] -= 20 * sideCount;
+        mySuppliesNeeded[4] += 20 * (4 - sideCount) + 10;
+
+        mySuppliesNeeded[5] -= 20 * sideCount;
+        mySuppliesNeeded[5] += 20 * (4 - sideCount) + 10;
     } else {
         let sideCount = getConnectedCount(clickedOn);
 
-        carpentrySkill -= 5 - (sideCount + 1);
-        mySuppliesNeeded[0] -= (80 - (20 * (sideCount + 1)));
-        mySuppliesNeeded[1] -= (4 - (sideCount + 1));
-        mySuppliesNeeded[2] -= 4;
-        mySuppliesNeeded[3] -= 10;
-        mySuppliesNeeded[4] -= (90 - (20 * (sideCount + 1)));
-        mySuppliesNeeded[5] -= (90 - (20 * (sideCount + 1)));
+        if(sideCount == -1) return -1;
+
+        updateHighestElevated();
+        if(gridSlot > 1) {
+            let elevatedNumber = getElevatedCarpentry(gridSlot - 1);
+
+            if(elevatedNumber > highestElevated) highestElevated = elevatedNumber;
+        } else {
+            carpentrySkill += sideCount;
+            //I added one to the side count to incorporate a new floor.
+            carpentrySkill -= (4 - sideCount) + 1;
+        }
+        if(highestElevated > carpentrySkill) elevatedPreferred = true;
+
+        mySuppliesNeeded[0] += 20 * sideCount;
+        mySuppliesNeeded[0] -= 20 * (4 - sideCount);
+
+        mySuppliesNeeded[1] += sideCount;
+        mySuppliesNeeded[1] -= 4 - sideCount;
+
+        if(gridSlot == 1) {
+            mySuppliesNeeded[2] -= 4;
+            mySuppliesNeeded[3] -= 10;
+        }
+
+        mySuppliesNeeded[4] += 20 * sideCount;
+        mySuppliesNeeded[4] -= 20 * (4 - sideCount) + 10;
+
+        mySuppliesNeeded[5] += 20 * sideCount;
+        mySuppliesNeeded[5] -= 20 * (4 - sideCount) + 10;
     }
 
-    document.getElementById("carpentry").innerHTML =
-        "Carpentry Required For Wooden House: " + carpentrySkill;
+    if(elevatedPreferred) {
+        document.getElementById("carpentry").innerHTML =
+            "Carpentry Required For Wooden House: " + highestElevated;
+    } else {
+        document.getElementById("carpentry").innerHTML =
+            "Carpentry Required For Wooden House: " + carpentrySkill;
+    }
     document.getElementById("planks").innerHTML =
         "Planks: " + mySuppliesNeeded[0];
     document.getElementById("largenails").innerHTML =
@@ -119,17 +237,13 @@ function changeRequirements(clickedOn, isInitial, isAdding) {
         "Stone Bricks: " + mySuppliesNeeded[4];
     document.getElementById("mortar").innerHTML =
         "Mortar: " + mySuppliesNeeded[5];
+    return 0;
 }
 
 //getConnectedCount returns the number of connected blocks relative
 //to the one selected by the user.
 function getConnectedCount(clickedOn) {
-    //-1 is returned as a special case, indicating that it's the first
-    //block, which requires no further inspection.
-    if(!buildingPlaced) {
-        buildingPlaced = true;
-        return -1;
-    }
+    if(!buildingPlaced) return 0;
 
     let myRow = clickedOn.myRow;
     let myCol = clickedOn.myCol;
@@ -138,6 +252,10 @@ function getConnectedCount(clickedOn) {
     let noUp = false;
     let noDown = false;
     let sideCount = 0;
+    let gSlotReference = hGridArray[myRow][myCol];
+    let isElevated = false;
+
+    if(gSlotReference > 1) isElevated = true;
 
     if(myRow - 1 < 0) noLeft = true;
     if(myRow + 1 > 20) noRight = true;
@@ -147,73 +265,47 @@ function getConnectedCount(clickedOn) {
     let normalSideValid = false;
     if(!noLeft) {
         let gridSlot = hGridArray[myRow - 1][myCol];
-        if(gridSlot >= 1) {
-            normalSideValid = true;
-            sideCount++;
+        if(gridSlot != 0) {
+            if(gridSlot >= gSlotReference) {
+                normalSideValid = true;
+                sideCount++;
+            } else if(gridSlot < gSlotReference) isElevated = true;
         }
     }
 
     if(!noRight) {
         let gridSlot = hGridArray[myRow + 1][myCol];
-        if(gridSlot >= 1) {
-            normalSideValid = true;
-            sideCount++;
+        if(gridSlot != 0) {
+            if(gridSlot >= gSlotReference) {
+                normalSideValid = true;
+                sideCount++;
+            } else if(gridSlot < gSlotReference) isElevated = true;
         }
     }
 
     if(!noDown) {
         let gridSlot = hGridArray[myRow][myCol - 1];
-        if(gridSlot >= 1) {
-            normalSideValid = true;
-            sideCount++;
+        if(gridSlot != 0) {
+            if(gridSlot >= gSlotReference) {
+                normalSideValid = true;
+                sideCount++;
+            } else if(gridSlot < gSlotReference) isElevated = true;
         }
     }
 
     if(!noUp) {
         let gridSlot = hGridArray[myRow][myCol + 1];
-        if(gridSlot >= 1) {
-            normalSideValid = true;
-            sideCount++;
+        if(gridSlot != 0) {
+            if(gridSlot >= gSlotReference) {
+                normalSideValid = true;
+                sideCount++;
+            } else if(gridSlot < gSlotReference) isElevated = true;
         }
     }
 
-    if(!normalSideValid) {
+    if(!normalSideValid && !isElevated) {
         alert("Invalid selection!\n(Diagonal or Separate building detected)");
-        return 0;
-    }
-
-    if(sideCount > 1) {
-        if(!noLeft && !noUp) {
-            let gridSlot = hGridArray[myRow - 1][myCol + 1];
-            if(gridSlot >= 1) {
-                sideCount++;
-                return sideCount;
-            }
-        }
-
-        if(!noLeft && !noDown) {
-            let gridSlot = hGridArray[myRow - 1][myCol - 1];
-            if(gridSlot >= 1) {
-                sideCount++;
-                return sideCount;
-            }
-        }
-
-        if(!noRight && !noUp) {
-            let gridSlot = hGridArray[myRow + 1][myCol + 1];
-            if(gridSlot >= 1) {
-                sideCount++;
-                return sideCount;
-            }
-        }
-
-        if(!noRight && !noDown) {
-            let gridSlot = hGridArray[myRow + 1][myCol - 1];
-            if(gridSlot >= 1) {
-                sideCount++;
-                return sideCount;
-            }
-        }
+        return -1;
     }
     return sideCount;
 }
@@ -225,29 +317,65 @@ function changeCellColor(myEvent) {
 
     diagnosticMessages(clickedOn, false);
 
+    //This area deals with adding a new square.
     colorCheck = clickedOn.style.backgroundColor;
     if(colorCheck != "rgb(255, 0, 0)") {
-        let sideCheck = getConnectedCount(clickedOn);
-        if(sideCheck == 0) return;
+        numSquaresSelected++;
+        if(numSquaresSelected == 1) buildingPlaced = true;
+        
+        hGridArray[clickedOn.myRow][clickedOn.myCol] = 1;
+        let myResultsFromChange = changeRequirements(clickedOn, true);
+
+        if(myResultsFromChange == -1) {
+            numSquaresSelected--;
+            hGridArray[clickedOn.myRow][clickedOn.myCol] = 0;
+            return;
+        }
 
         clickedOn.style.backgroundColor = "rgb(255, 0, 0)";
-        hGridArray[clickedOn.myRow][clickedOn.myCol] = 1;
-        numSquaresSelected++;
-        if(sideCheck == -1) changeRequirements(clickedOn, true, false);
-        else changeRequirements(clickedOn, false, true);
+        clickedOn.innerHTML = 1;
         return;
     }
 
-    if(numSquaresSelected == 0) {
-        buildingPlaced = false;
-        mySuppliesNeeded = [0, 0, 0, 0];
+    if(myEvent.ctrlKey) {
+        if(hGridArray[clickedOn.myRow][clickedOn.myCol] + 1 > 16) {
+            alert("Max limit reached: Wurm houses cannot go beyond 16 levels!");
+            return;
+        }
+        hGridArray[clickedOn.myRow][clickedOn.myCol] += 1;
+
+        if(hGridArray[clickedOn.myRow][clickedOn.myCol] == 2) numElevated++;
+
+        let myGridSlot = hGridArray[clickedOn.myRow][clickedOn.myCol];
+        clickedOn.innerHTML = myGridSlot;
+        changeRequirements(clickedOn, true);
+        return;
     }
 
-    clickedOn.style.backgroundColor = "rgba(0, 0, 0, 0)";
-    hGridArray[clickedOn.myRow][clickedOn.myCol] = 0;
-    numSquaresSelected--;
-    if(numSquaresSelected == 0) buildingPlaced = false;
-    changeRequirements(clickedOn, false, false);
+    //This area deals with the removal of a square.
+    if(hGridArray[clickedOn.myRow][clickedOn.myCol] == 1) {
+        numSquaresSelected--;
+        if(numSquaresSelected == 0) buildingPlaced = false;
+    }
+
+    if(hGridArray[clickedOn.myRow][clickedOn.myCol] - 1 == 1 && numElevated != 0) {
+        numElevated--;
+    }
+
+    let myResultsFromChange = changeRequirements(clickedOn, false);
+    if(myResultsFromChange == -1) {
+        numSquaresSelected++;
+        return;
+    }
+
+    hGridArray[clickedOn.myRow][clickedOn.myCol]--;
+
+    if(hGridArray[clickedOn.myRow][clickedOn.myCol] != 0) {
+        clickedOn.innerHTML = hGridArray[clickedOn.myRow][clickedOn.myCol];
+    } else {
+        clickedOn.style.backgroundColor = "rgba(0, 0, 0, 0)";
+        clickedOn.innerHTML = "";
+    }
 }
 
 //twoDimArray returns a newly initialized two-dimensional array.
@@ -277,6 +405,8 @@ function housingGrid(rows, columns) {
             tableCell.addEventListener('click', changeCellColor, false);
             tableCell.myRow = currentRow;
             tableCell.myCol = currentCol;
+
+            hGridArray[currentRow][currentCol] = 0;
         }
     }
     return hGrid;
@@ -284,10 +414,14 @@ function housingGrid(rows, columns) {
 
 //Variables
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
-var myGrid = housingGrid(20, 20);
-var hGridArray = twoDimArray(20);
+var lengthOfGrid = 20;
+var widthOfGrid = 20;
+var hGridArray = twoDimArray(lengthOfGrid);
+var myGrid = housingGrid(lengthOfGrid, widthOfGrid);
 var buildingPlaced = false;
 var numSquaresSelected = 0;
+var numElevated = 0;
+var highestElevated = 0;
 var carpentrySkill = 0;
 var masonrySkill = 30;
 //1st: Planks, 2nd: Large Nails, 3rd: Small Nails, 4th: Wood Shingles

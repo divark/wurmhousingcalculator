@@ -3,6 +3,7 @@
     cursor:pointer;
     width:30px; height:30px;
     border:1px solid #ccc;
+    text-align: center;
 }
 table, td {
     border: 1px solid #ccc;
