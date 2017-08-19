@@ -376,7 +376,7 @@ function getConnectedCount(clickedOn, isSubtracting) {
         return -1;
     }
 
-    if(isSubtracting && sideCount == 4) {
+    if(isSubtracting && sideCount != 1) {
         if(gSlotReference - 1 == 0) {
             alert("Invalid selection!\n(Diagonal or Separate building detected)");
             return -1;
