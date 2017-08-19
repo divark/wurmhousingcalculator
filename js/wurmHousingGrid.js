@@ -418,19 +418,21 @@ function getConnectedCount(clickedOn, isSubtracting) {
     return sideCount;
 }
 
-//changeCellColor changes a cell to either red if selected the first
-//time, or white otherwise.
-function changeCellColor(myEvent) {
+//increaseGridSlot changes the content and color of a grid based on
+//the addition of a level. Left click is assumed for the event.
+function increaseGridSlot(myEvent) {
     let clickedOn = myEvent.target;
 
-    diagnosticMessages(clickedOn, false);
+    if(hGridArray[clickedOn.myRow][clickedOn.myCol] + 1 > 16) {
+        alert("Max limit reached: Wurm houses cannot go beyond 16 levels!");
+        return;
+    }
 
-    //This area deals with adding a new square.
-    if(hGridArray[clickedOn.myRow][clickedOn.myCol] == 0) {
+    hGridArray[clickedOn.myRow][clickedOn.myCol]++;
+    if(hGridArray[clickedOn.myRow][clickedOn.myCol] == 1) {
         numSquaresSelected++;
         if(numSquaresSelected == 1) buildingPlaced = true;
         
-        hGridArray[clickedOn.myRow][clickedOn.myCol] = 1;
         let myResultsFromChange = changeRequirements(clickedOn, true);
 
         if(myResultsFromChange == -1) {
@@ -444,23 +446,22 @@ function changeCellColor(myEvent) {
         return;
     }
 
-    if(myEvent.ctrlKey) {
-        if(hGridArray[clickedOn.myRow][clickedOn.myCol] + 1 > 16) {
-            alert("Max limit reached: Wurm houses cannot go beyond 16 levels!");
-            return;
-        }
-        hGridArray[clickedOn.myRow][clickedOn.myCol] += 1;
+    if(hGridArray[clickedOn.myRow][clickedOn.myCol] == 2) numElevated++;
 
-        if(hGridArray[clickedOn.myRow][clickedOn.myCol] == 2) numElevated++;
+    let myGridSlot = hGridArray[clickedOn.myRow][clickedOn.myCol];
+    clickedOn.innerHTML = myGridSlot;
+    changeRequirements(clickedOn, true);
+    clickedOn.style.backgroundColor = getElevatedColor(hGridArray[clickedOn.myRow][clickedOn.myCol]);
+}
 
-        let myGridSlot = hGridArray[clickedOn.myRow][clickedOn.myCol];
-        clickedOn.innerHTML = myGridSlot;
-        changeRequirements(clickedOn, true);
-        clickedOn.style.backgroundColor = getElevatedColor(hGridArray[clickedOn.myRow][clickedOn.myCol]);
-        return;
-    }
+//decreaseGridSlot changes the content and color of a grid based on
+//the reduction of a level. Right click is assumed for the event.
+function decreaseGridSlot(myEvent) {
+    myEvent.preventDefault();
+    let clickedOn = myEvent.target;
 
-    // //This area deals with the removal of a square.
+    if(hGridArray[clickedOn.myRow][clickedOn.myCol] == 0) return;
+
     if(hGridArray[clickedOn.myRow][clickedOn.myCol] == 1) {
         numSquaresSelected--;
         if(numSquaresSelected == 0) buildingPlaced = false;
@@ -510,7 +511,8 @@ function housingGrid(rows, columns) {
             let tableCell = tableRow.
                 appendChild(document.createElement('td'));
 
-            tableCell.addEventListener('click', changeCellColor, false);
+            tableCell.addEventListener('click', increaseGridSlot, false);
+            tableCell.addEventListener('contextmenu', decreaseGridSlot, false);
             tableCell.myRow = currentRow;
             tableCell.myCol = currentCol;
 
