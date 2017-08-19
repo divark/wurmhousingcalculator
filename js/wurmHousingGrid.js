@@ -141,8 +141,8 @@ function changeRequirements(clickedOn, isAdding) {
         mySuppliesNeeded[1] = 4;
         mySuppliesNeeded[2] = 8;
         mySuppliesNeeded[3] = 10;
-        mySuppliesNeeded[4] = 95;
-        mySuppliesNeeded[5] = 90;
+        mySuppliesNeeded[4] = 90;
+        mySuppliesNeeded[5] = 95;
         mySuppliesNeeded[6] = 10;
 
         document.getElementById("carpentry").innerHTML =
