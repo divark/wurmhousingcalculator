@@ -202,7 +202,7 @@ function changeRequirements(clickedOn, isAdding) {
 
     let elevatedPreferred = false;
     if(isAdding) {
-        let sideCount = getConnectedCount(clickedOn);
+        let sideCount = getConnectedCount(clickedOn, false);
 
         if(sideCount == -1) return -1;
 
@@ -246,7 +246,7 @@ function changeRequirements(clickedOn, isAdding) {
         }
 
     } else {
-        let sideCount = getConnectedCount(clickedOn);
+        let sideCount = getConnectedCount(clickedOn, true);
 
         if(sideCount == -1) return -1;
 
@@ -310,7 +310,7 @@ function changeRequirements(clickedOn, isAdding) {
 
 //getConnectedCount returns the number of connected blocks relative
 //to the one selected by the user.
-function getConnectedCount(clickedOn) {
+function getConnectedCount(clickedOn, isSubtracting) {
     if(!buildingPlaced) return 0;
 
     let myRow = clickedOn.myRow;
@@ -334,7 +334,7 @@ function getConnectedCount(clickedOn) {
     if(!noLeft) {
         let gridSlot = hGridArray[myRow - 1][myCol];
         if(gridSlot != 0) {
-            if(gridSlot >= gSlotReference) {
+            if(gridSlot >= gSlotReference && gSlotReference != 0) {
                 normalSideValid = true;
                 sideCount++;
             } else if(gridSlot < gSlotReference) isElevated = true;
@@ -344,7 +344,7 @@ function getConnectedCount(clickedOn) {
     if(!noRight) {
         let gridSlot = hGridArray[myRow + 1][myCol];
         if(gridSlot != 0) {
-            if(gridSlot >= gSlotReference) {
+            if(gridSlot >= gSlotReference && gSlotReference != 0) {
                 normalSideValid = true;
                 sideCount++;
             } else if(gridSlot < gSlotReference) isElevated = true;
@@ -354,7 +354,7 @@ function getConnectedCount(clickedOn) {
     if(!noDown) {
         let gridSlot = hGridArray[myRow][myCol - 1];
         if(gridSlot != 0) {
-            if(gridSlot >= gSlotReference) {
+            if(gridSlot >= gSlotReference && gSlotReference != 0) {
                 normalSideValid = true;
                 sideCount++;
             } else if(gridSlot < gSlotReference) isElevated = true;
@@ -364,7 +364,7 @@ function getConnectedCount(clickedOn) {
     if(!noUp) {
         let gridSlot = hGridArray[myRow][myCol + 1];
         if(gridSlot != 0) {
-            if(gridSlot >= gSlotReference) {
+            if(gridSlot >= gSlotReference && gSlotReference != 0) {
                 normalSideValid = true;
                 sideCount++;
             } else if(gridSlot < gSlotReference) isElevated = true;
@@ -374,6 +374,13 @@ function getConnectedCount(clickedOn) {
     if(!normalSideValid && !isElevated) {
         alert("Invalid selection!\n(Diagonal or Separate building detected)");
         return -1;
+    }
+
+    if(isSubtracting && sideCount == 4) {
+        if(gSlotReference - 1 == 0) {
+            alert("Invalid selection!\n(Diagonal or Separate building detected)");
+            return -1;
+        }
     }
     return sideCount;
 }
