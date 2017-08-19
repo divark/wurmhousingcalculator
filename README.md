@@ -5,7 +5,7 @@ Ever wanted to know exactly how many materials you needed to build your new wood
 
 The Wurm Housing Calculator is a third party web application built for simplicity to get you those numbers fast. Inspired by another user-made web application as shown [here](http://webdepp.sense-net.at/~toni/wurm/housecalc.php), this was made to look a bit nicer, and to do the calculations in real time.
 
-![Screenshot](assets/WurmHouseCalc3.png)
+![Screenshot](assets/WurmHouseCalc3fixed.png)
 
 ## Features
 - See what materials you need to make a wooden house
