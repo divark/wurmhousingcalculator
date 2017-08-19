@@ -372,14 +372,47 @@ function getConnectedCount(clickedOn, isSubtracting) {
     }
 
     if(!normalSideValid && !isElevated) {
-        alert("Invalid selection!\n(Diagonal or Separate building detected)");
         return -1;
     }
 
-    if(isSubtracting && sideCount != 1) {
+    if(isSubtracting) {
+        let isInvalid = false;
+
+        if(!noLeft && hGridArray[myRow - 1][myCol] == 0) noLeft = true;
+        if(!noRight && hGridArray[myRow + 1][myCol] == 0) noRight = true;
+        if(!noUp && hGridArray[myRow][myCol + 1] == 0) noUp = true;
+        if(!noDown && hGridArray[myRow][myCol - 1] == 0) noDown = true;
+
         if(gSlotReference - 1 == 0) {
-            alert("Invalid selection!\n(Diagonal or Separate building detected)");
-            return -1;
+            hGridArray[myRow][myCol]--;
+            if(!noLeft) {
+                clickedOn.myRow = myRow - 1;
+                if(getConnectedCount(clickedOn) == -1) isInvalid = true;
+            }
+
+            if(!noRight) {
+                clickedOn.myRow = myRow + 1;
+                if(getConnectedCount(clickedOn) == -1) isInvalid = true;
+            }
+
+            if(!noDown) {
+                clickedOn.myCol = myCol - 1;
+                if(getConnectedCount(clickedOn) == -1) isInvalid = true;
+            }
+
+            if(!noUp) {
+                clickedOn.myCol = myCol + 1;
+                if(getConnectedCount(clickedOn) == -1) isInvalid = true;
+            }
+
+            clickedOn.myRow = myRow;
+            clickedOn.myCol = myCol;
+            hGridArray[myRow][myCol]++;
+
+            if(isInvalid) {
+                alert("Invalid selection!\n(Diagonal or Separate building detected)");
+                return -1;
+            }
         }
     }
     return sideCount;
